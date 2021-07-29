@@ -1,10 +1,28 @@
-import pool from '../lib/utils/pool.js';
-import setup from '../data/setup.js';
-import request from 'supertest';
-import app from '../lib/app.js';
+const pool = require('../lib/utils/pool');
+const twilio = require('twilio');
+const setup = require('../data/setup.js');
+const request = require('../lib/app');
+const Cake = require('../lib/models/Cake');
 
-describe('demo routes', () => {
+jest.mock('twilio', () => () => ({
+  message: {
+    create: jest.fn(),
+  },
+}));
+
+
+describe('Cake routes', () => {
   beforeEach(() => {
     return setup(pool);
+  });
+
+  it('creates a new order in our database and sends a text message', () => {
+    return request(app)
+    
+      .post('api/v1/cakes')
+      .send({ type: 'Tres Leches', flavor: 'coffee', quantity: 1 })
+      .then((res) => { 
+        expect(res.body).toEqual({ type: 'Tres Leches', flavor: 'coffee', quantity: 1 });
+      });
   });
 });
